@@ -2,10 +2,10 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mapa TERRITORIAL CENIIECT</title>
     
-    <!-- Fuentes: Inter para un look moderno -->
+    <!-- Fuentes: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -15,13 +15,13 @@
 
     <style>
         :root {
-            /* Variables Tema Claro (Por defecto) */
+            /* Variables Tema Claro */
             --bg-color: #FAFAFA;
             --surface-color: #FFFFFF;
             --text-main: #111827;
             --text-muted: #6B7280;
             --border-color: #E5E7EB;
-            --accent-color: #0070F3; /* Azul Vercel/Stripe */
+            --accent-color: #0070F3;
             --accent-hover: #0051B3;
             
             /* Burbujas */
@@ -70,7 +70,7 @@
         /* --- Header & Theme Toggle --- */
         header {
             background-color: var(--surface-color);
-            padding: 1rem 2rem;
+            padding: 0.85rem 1.5rem;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
@@ -79,25 +79,25 @@
             transition: background-color var(--transition-speed), border-color var(--transition-speed);
         }
 
-        .header-titles h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.025em; }
-        .header-titles .subtitle { color: var(--text-muted); font-size: 0.85rem; }
+        .header-titles h1 { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.025em; }
+        .header-titles .subtitle { color: var(--text-muted); font-size: 0.8rem; }
 
         .theme-toggle-btn {
             background: none;
             border: 1px solid var(--border-color);
-            padding: 0.5rem;
+            padding: 0.4rem 0.6rem;
             border-radius: 8px;
             cursor: pointer;
             color: var(--text-main);
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-size: 0.85rem;
+            gap: 0.4rem;
+            font-size: 0.8rem;
             font-weight: 500;
             transition: all 0.2s;
         }
         .theme-toggle-btn:hover { background-color: var(--bg-color); border-color: var(--text-muted); }
-        .theme-toggle-btn svg { width: 16px; height: 16px; }
+        .theme-toggle-btn svg { width: 15px; height: 15px; }
         body.dark-mode .sun-icon, body:not(.dark-mode) .moon-icon { display: none; }
 
         /* --- Main Layout --- */
@@ -106,10 +106,9 @@
         /* --- Map --- */
         #map { flex: 1; width: 100%; height: 100%; z-index: 1; background-color: var(--bg-color); }
 
-        /* --- Custom Markers (Burbujas) --- */
+        /* --- Custom Markers --- */
         .leaflet-div-icon { background: transparent; border: none; }
 
-        /* Contenedor wrapper para controlar interactividad */
         .marker-wrapper {
             display: flex;
             align-items: center;
@@ -118,7 +117,7 @@
             height: 100%;
         }
 
-        /* Burbuja Municipio (Grande, Azul) */
+        /* Burbuja Municipio */
         .muni-bubble {
             background-color: var(--muni-bubble-bg);
             color: var(--muni-bubble-color);
@@ -142,7 +141,7 @@
             display: none !important;
         }
 
-        /* Burbuja Institución (Pequeña, Blanca/Negra) */
+        /* Burbuja Institución */
         .inst-bubble {
             background-color: var(--inst-bubble-bg);
             color: var(--inst-bubble-color);
@@ -158,13 +157,13 @@
             transform-origin: center;
             opacity: 0; 
             transform: scale(0);
-            pointer-events: none !important; /* Desactivado por defecto mientras esté oculto */
+            pointer-events: none !important;
             display: none !important;
         }
         .inst-bubble.visible { 
             opacity: 1; 
             transform: scale(1); 
-            pointer-events: auto !important; /* Solo activa clics cuando es visible */
+            pointer-events: auto !important;
             display: flex !important;
         }
         .inst-bubble:hover { transform: scale(1.3) !important; z-index: 1000; background-color: var(--accent-color); color: white; }
@@ -178,21 +177,21 @@
             border: 1px solid var(--border-color);
             z-index: 1000;
             transform: translateX(120%);
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), background-color var(--transition-speed), border-color var(--transition-speed);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), background-color var(--transition-speed);
             display: flex; flex-direction: column; overflow: hidden;
         }
         #sidebar.open { transform: translateX(0); }
 
-        .sidebar-header { padding: 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: flex-start; }
-        .sidebar-title { font-size: 1.1rem; font-weight: 600; }
-        .sidebar-subtitle { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem; }
+        .sidebar-header { padding: 1.1rem 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: flex-start; }
+        .sidebar-title { font-size: 1.05rem; font-weight: 600; }
+        .sidebar-subtitle { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.15rem; }
 
-        .close-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 0.2rem; border-radius: 4px; }
+        .close-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 0.3rem; border-radius: 6px; }
         .close-btn:hover { background-color: var(--bg-color); color: var(--text-main); }
 
         .sidebar-content { padding: 1rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 1rem; }
 
-        .zone-section .zone-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 600; margin-bottom: 0.5rem; padding-left: 0.5rem;}
+        .zone-section .zone-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 600; margin-bottom: 0.5rem; padding-left: 0.25rem;}
 
         .inst-list { list-style: none; display: flex; flex-direction: column; gap: 0.35rem; }
         .inst-item {
@@ -209,11 +208,10 @@
         .inst-item:hover { border-color: var(--accent-color); background-color: var(--surface-color); transform: translateX(-2px); }
         .inst-item.highlight { border-color: var(--accent-color); background-color: rgba(50, 145, 255, 0.12); font-weight: 600; }
         .inst-item.no-coord { opacity: 0.75; cursor: default; }
-        .inst-item.no-coord:hover { transform: none; border-color: var(--border-color); }
         
         .tag-pending { font-size: 0.65rem; color: var(--text-muted); background: var(--border-color); padding: 2px 6px; border-radius: 4px; }
 
-        /* Tooltip moderno */
+        /* Tooltip */
         .leaflet-tooltip.modern-tooltip {
             background-color: var(--surface-color);
             color: var(--text-main);
@@ -225,6 +223,28 @@
             box-shadow: var(--shadow-sm);
         }
 
+        /* Responsive Móvil (Bottom Sheet) */
+        @media (max-width: 768px) {
+            header { padding: 0.75rem 1rem; }
+            .header-titles h1 { font-size: 1rem; }
+            .header-titles .subtitle { font-size: 0.75rem; }
+
+            #sidebar {
+                top: auto; right: 0; bottom: 0; left: 0;
+                width: 100%; height: 52vh;
+                border-radius: 20px 20px 0 0;
+                border-bottom: none;
+                transform: translateY(120%);
+            }
+            #sidebar.open { transform: translateY(0); }
+
+            .sidebar-header::before {
+                content: ''; position: absolute; top: 8px; left: 50%;
+                transform: translateX(-50%); width: 36px; height: 4px;
+                background-color: var(--border-color); border-radius: 2px;
+            }
+            .sidebar-header { padding-top: 1.25rem; }
+        }
     </style>
 </head>
 <body>
@@ -232,7 +252,7 @@
     <header>
         <div class="header-titles">
             <h1>Mapa TERRITORIAL CENIIECT</h1>
-            <div class="subtitle">Departamento del Magdalena</div>
+            <div class="subtitle">República de Colombia</div>
         </div>
         <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Cambiar tema">
             <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
@@ -265,16 +285,15 @@
 
     <script>
         /**
-         * COORDENADAS EXACTAS PROPORCIONADAS
+         * BASE DE DATOS
          */
         const educacionData = [
             {
                 id: "santa-marta",
                 name: "Santa Marta",
-                coords: [11.2404, -74.1978], // Centroide
+                coords: [11.2404, -74.1978],
                 zoom: 11,
                 instituciones: [
-                    // ZONA URBANA
                     { id: "sm_ied_mag", name: "I.E.D. Magdalena", zone: "Urbana", coords: [11.24195459455506, -74.1966160597475] },
                     { id: "sm_ied_jmd", name: "IED Juan Miguel D'Osuna", zone: "Urbana", coords: [11.22569016697624, -74.17460354175658] },
                     { id: "sm_ied_on", name: "IED Once de Noviembre", zone: "Urbana", coords: [11.221588946664031, -74.15606096498708] },
@@ -287,9 +306,7 @@
                     { id: "sm_ied_sr", name: "IED Simón Rodríguez", zone: "Urbana", coords: [11.228496434938736, -74.16743289042674] },
                     { id: "sm_ied_ln", name: "IED Liceo del Norte", zone: "Urbana", coords: [11.249778703828827, -74.20185935847962] },
                     { id: "sm_ied_ct", name: "I.E.D. Camilo Torres", zone: "Urbana", coords: [11.193302536512217, -74.21873509042702] },
-                    { id: "sm_ied_lrm", name: "Institución Educativa Libardo Ramiro Muñoz", zone: "Urbana", coords: null }, // No encontrada
-                    
-                    // ZONA RURAL
+                    { id: "sm_ied_lrm", name: "Institución Educativa Libardo Ramiro Muñoz", zone: "Urbana", coords: null },
                     { id: "sm_ied_bon", name: "IED Bonda (Sede 4 Inmaculada Concepción)", zone: "Rural", coords: [11.230894009886562, -74.13064140207788] },
                     { id: "sm_ied_rev", name: "Institución Etnoeducativa Distrital Intercultural La Revuelta", zone: "Rural", coords: [11.278347292734285, -73.94121982546527] }
                 ]
@@ -305,11 +322,11 @@
             }
         ];
 
-        // Configuración Global
+        /* CONFIGURACIÓN VISTA INICIAL: COLOMBIA COMPLETA */
         const config = {
-            mapCenter: [10.90, -74.15],
-            initZoom: 9,
-            minZoomToDistricts: 11
+            mapCenter: [4.5709, -74.2973], // Coordenadas del centro de Colombia
+            initZoom: 6,                   // Zoom adecuado para ver todo el país
+            minZoomToDistricts: 10         // Umbral ajustado para que no falle Santa Marta
         };
 
         let map, muniLayerGroup, instLayerGroup;
@@ -330,7 +347,6 @@
 
             L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-            // Capa de instituciones en el fondo, municipios arriba
             instLayerGroup = L.layerGroup().addTo(map);
             muniLayerGroup = L.layerGroup().addTo(map);
 
@@ -341,7 +357,6 @@
             educacionData.forEach(muni => {
                 const totalInst = muni.instituciones.length;
 
-                // 1. Marcador Municipio (Burbuja Principal) con Z-Index mayor
                 const muniIcon = L.divIcon({
                     className: '',
                     html: `<div class="marker-wrapper"><div class="muni-bubble" id="muni-bubble-${muni.id}" style="width:52px; height:52px;">${totalInst}</div></div>`,
@@ -353,22 +368,23 @@
                 muniMarker.bindTooltip(`<b>${muni.name}</b><br>${totalInst} Instituciones`, { direction: 'bottom', className: 'modern-tooltip' });
                 
                 muniMarker.on('click', () => {
-                    // Si tiene puntos válidos, encuadrar automáticamente todas sus instituciones
+                    // Abrimos el menú inmediatamente
+                    openSidebar(muni.id);
+
+                    // Calculamos el zoom idóneo
                     const validCoords = muni.instituciones.filter(i => i.coords !== null).map(i => i.coords);
                     if (validCoords.length > 0) {
                         const bounds = L.latLngBounds(validCoords);
-                        map.flyToBounds(bounds, { padding: [60, 60], maxZoom: 14 });
+                        map.flyToBounds(bounds, { padding: [50, 50], maxZoom: 13 });
                     } else {
-                        map.flyTo(muni.coords, muni.zoom);
+                        map.flyTo(muni.coords, 12);
                     }
-                    openSidebar(muni.id);
                 });
 
                 muniMarker.addTo(muniLayerGroup);
 
-                // 2. Marcadores para Colegios Individuales
                 muni.instituciones.forEach((inst, index) => {
-                    if (!inst.coords) return; // Si no tiene coordenadas se omite del mapa
+                    if (!inst.coords) return;
 
                     const instIcon = L.divIcon({
                         className: '',
@@ -381,7 +397,7 @@
                     instMarker.bindTooltip(inst.name, { direction: 'top', className: 'modern-tooltip' });
 
                     instMarker.on('click', (e) => {
-                        L.DomEvent.stopPropagation(e); // Evita interferencias
+                        L.DomEvent.stopPropagation(e);
                         openSidebar(muni.id, inst.id);
                     });
 
@@ -390,7 +406,7 @@
             });
         }
 
-        // Control estricto de visibilidad para prevenir clics indeseados
+        // Control dinámico de visibilidad según nivel de Zoom
         function handleZoomEnd() {
             const currentZoom = map.getZoom();
             const muniBubbles = document.querySelectorAll('.muni-bubble');
@@ -402,7 +418,6 @@
             } else {
                 muniBubbles.forEach(b => b.classList.remove('hidden'));
                 instBubbles.forEach(b => b.classList.remove('visible'));
-                if (sidebar.classList.contains('open')) closeSidebar(false);
             }
         }
 
@@ -444,7 +459,7 @@
                         li.innerText = inst.name;
                         li.onclick = () => highlightMarker(inst);
                     } else {
-                        li.innerHTML = `<span>${inst.name}</span><span class="tag-pending">Ubicación pendiente</span>`;
+                        li.innerHTML = `<span>${inst.name}</span><span class="tag-pending">Sin ubicación</span>`;
                     }
                     
                     ul.appendChild(li);
@@ -463,13 +478,9 @@
             }
         }
 
-        function closeSidebar(flyBack = true) {
+        function closeSidebar() {
             sidebar.classList.remove('open');
             document.querySelectorAll('.inst-item').forEach(el => el.classList.remove('highlight'));
-            
-            if (flyBack) {
-                map.flyTo(config.mapCenter, config.initZoom);
-            }
         }
 
         function highlightMarker(inst) {
@@ -478,7 +489,12 @@
             document.querySelectorAll('.inst-item').forEach(el => el.classList.remove('highlight'));
             document.getElementById(`item-${inst.id}`)?.classList.add('highlight');
             
-            map.flyTo(inst.coords, 16);
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                map.flyTo([inst.coords[0] - 0.005, inst.coords[1]], 15);
+            } else {
+                map.flyTo(inst.coords, 16);
+            }
             
             const bubbleEl = document.getElementById(`inst-bubble-${inst.id}`);
             if (bubbleEl) {
