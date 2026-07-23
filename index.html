@@ -329,10 +329,11 @@
             minZoomToDistricts: 10         // Umbral ajustado para que no falle Santa Marta
         };
 
-        let map, muniLayerGroup, instLayerGroup;
+        let map, muniLayerGroup, instLayerGroup, colombiaGeoJsonLayer;
 
         function init() {
             initMap();
+            loadColombiaBoundary();
             plotData();
         }
 
@@ -353,6 +354,30 @@
             map.on('zoomend', handleZoomEnd);
         }
 
+        /* DIBUJAR FRONTERA RESALTADA DE COLOMBIA */
+        function loadColombiaBoundary() {
+            fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries/COL.geo.json')
+                .then(res => res.json())
+                .then(data => {
+                    colombiaGeoJsonLayer = L.geoJSON(data, {
+                        style: getColombiaStyle()
+                    }).addTo(map);
+                })
+                .catch(err => console.error("Error al cargar frontera de Colombia:", err));
+        }
+
+        function getColombiaStyle() {
+            const isDark = document.body.classList.contains('dark-mode');
+            return {
+                color: isDark ? '#3291FF' : '#0070F3', // Color del borde destacado
+                weight: 2.5,
+                opacity: 0.85,
+                fillColor: isDark ? '#3291FF' : '#0070F3',
+                fillOpacity: isDark ? 0.08 : 0.05,
+                interactive: false
+            };
+        }
+
         function plotData() {
             educacionData.forEach(muni => {
                 const totalInst = muni.instituciones.length;
@@ -368,10 +393,8 @@
                 muniMarker.bindTooltip(`<b>${muni.name}</b><br>${totalInst} Instituciones`, { direction: 'bottom', className: 'modern-tooltip' });
                 
                 muniMarker.on('click', () => {
-                    // Abrimos el menú inmediatamente
                     openSidebar(muni.id);
 
-                    // Calculamos el zoom idóneo
                     const validCoords = muni.instituciones.filter(i => i.coords !== null).map(i => i.coords);
                     if (validCoords.length > 0) {
                         const bounds = L.latLngBounds(validCoords);
@@ -521,6 +544,11 @@
                 map.tileLayers.light.addTo(map);
             }
             
+            // Actualizamos la frontera de Colombia con el tema activo
+            if (colombiaGeoJsonLayer) {
+                colombiaGeoJsonLayer.setStyle(getColombiaStyle());
+            }
+
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
         }
 
