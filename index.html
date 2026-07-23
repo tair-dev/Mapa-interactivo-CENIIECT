@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prototipo Mapa Educativo - Magdalena</title>
+    <title>Mapa TERRITORIAL CENIIECT</title>
     
     <!-- Fuentes: Inter para un look moderno -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -47,7 +47,7 @@
             --text-main: #EDEDED;
             --text-muted: #A0A0A0;
             --border-color: #333333;
-            --accent-color: #3291FF; /* Azul más brillante para contraste */
+            --accent-color: #3291FF;
             
             --muni-bubble-bg: var(--accent-color);
             --inst-bubble-bg: #161616;
@@ -79,7 +79,7 @@
             transition: background-color var(--transition-speed), border-color var(--transition-speed);
         }
 
-        .header-titles h1 { font-size: 1.15rem; font-weight: 600; letter-spacing: -0.025em; }
+        .header-titles h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.025em; }
         .header-titles .subtitle { color: var(--text-muted); font-size: 0.85rem; }
 
         .theme-toggle-btn {
@@ -109,6 +109,15 @@
         /* --- Custom Markers (Burbujas) --- */
         .leaflet-div-icon { background: transparent; border: none; }
 
+        /* Contenedor wrapper para controlar interactividad */
+        .marker-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+
         /* Burbuja Municipio (Grande, Azul) */
         .muni-bubble {
             background-color: var(--muni-bubble-bg);
@@ -119,12 +128,19 @@
             justify-content: center;
             font-weight: 700;
             font-size: 1.1rem;
-            box-shadow: 0 0 0 4px rgba(50, 145, 255, 0.2);
+            box-shadow: 0 0 0 4px rgba(50, 145, 255, 0.25);
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s;
             transform-origin: center;
+            cursor: pointer;
+            pointer-events: auto;
         }
         .muni-bubble:hover { transform: scale(1.1); }
-        .muni-bubble.hidden { opacity: 0; transform: scale(0); pointer-events: none; }
+        .muni-bubble.hidden { 
+            opacity: 0; 
+            transform: scale(0); 
+            pointer-events: none !important;
+            display: none !important;
+        }
 
         /* Burbuja Institución (Pequeña, Blanca/Negra) */
         .inst-bubble {
@@ -140,10 +156,18 @@
             box-shadow: var(--shadow-sm);
             transition: all 0.2s ease, opacity 0.3s ease var(--delay, 0s), transform 0.3s ease var(--delay, 0s);
             transform-origin: center;
-            opacity: 0; transform: scale(0); /* Estado inicial oculto */
+            opacity: 0; 
+            transform: scale(0);
+            pointer-events: none !important; /* Desactivado por defecto mientras esté oculto */
+            display: none !important;
         }
-        .inst-bubble.visible { opacity: 1; transform: scale(1); }
-        .inst-bubble:hover { transform: scale(1.25) !important; z-index: 1000; background-color: var(--accent-color); color: white; }
+        .inst-bubble.visible { 
+            opacity: 1; 
+            transform: scale(1); 
+            pointer-events: auto !important; /* Solo activa clics cuando es visible */
+            display: flex !important;
+        }
+        .inst-bubble:hover { transform: scale(1.3) !important; z-index: 1000; background-color: var(--accent-color); color: white; }
 
         /* --- Sidebar Panel --- */
         #sidebar {
@@ -178,9 +202,16 @@
             border-radius: 8px;
             transition: all 0.2s;
             cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .inst-item:hover { border-color: var(--accent-color); background-color: var(--surface-color); transform: translateX(-2px); }
         .inst-item.highlight { border-color: var(--accent-color); background-color: rgba(50, 145, 255, 0.12); font-weight: 600; }
+        .inst-item.no-coord { opacity: 0.75; cursor: default; }
+        .inst-item.no-coord:hover { transform: none; border-color: var(--border-color); }
+        
+        .tag-pending { font-size: 0.65rem; color: var(--text-muted); background: var(--border-color); padding: 2px 6px; border-radius: 4px; }
 
         /* Tooltip moderno */
         .leaflet-tooltip.modern-tooltip {
@@ -200,7 +231,7 @@
 
     <header>
         <div class="header-titles">
-            <h1>Cobertura Territorial de Instituciones Educativas</h1>
+            <h1>Mapa TERRITORIAL CENIIECT</h1>
             <div class="subtitle">Departamento del Magdalena</div>
         </div>
         <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Cambiar tema">
@@ -234,41 +265,42 @@
 
     <script>
         /**
-         * COORDENADAS REALES Y PRECISAS PARA LAS INSTITUCIONES EDUCATIVAS
+         * COORDENADAS EXACTAS PROPORCIONADAS
          */
         const educacionData = [
             {
                 id: "santa-marta",
                 name: "Santa Marta",
-                coords: [11.2404, -74.1978], // Centroide Urbano
+                coords: [11.2404, -74.1978], // Centroide
                 zoom: 11,
                 instituciones: [
                     // ZONA URBANA
-                    { id: "sm_ied_mag", name: "I.E.D. Magdalena", zone: "Urbana", coords: [11.2336, -74.2015] },
-                    { id: "sm_ied_jmd", name: "IED Juan Miguel D'Osuna", zone: "Urbana", coords: [11.2472, -74.2075] },
-                    { id: "sm_ied_on", name: "IED Once de Noviembre", zone: "Urbana", coords: [11.2285, -74.1532] },
-                    { id: "sm_ied_jlg", name: "IED José Laborde Gnecco", zone: "Urbana", coords: [11.2492, -74.2115] },
-                    { id: "sm_ied_sb", name: "I.E.D. Simón Bolívar", zone: "Urbana", coords: [11.2295, -74.1728] },
-                    { id: "sm_ied_rdb", name: "IED Rodrigo de las Bastidas", zone: "Urbana", coords: [11.2458, -74.1685] },
-                    { id: "sm_ied_ti", name: "IED Técnico Industrial", zone: "Urbana", coords: [11.2361, -74.2038] },
-                    { id: "sm_ied_pc", name: "IED Pedagógico del Caribe", zone: "Urbana", coords: [11.2165, -74.1520] },
-                    { id: "sm_ied_nb", name: "IED Nicolás Buenaventura", zone: "Urbana", coords: [11.2515, -74.1620] },
-                    { id: "sm_ied_sr", name: "IED Simón Rodríguez", zone: "Urbana", coords: [11.2350, -74.1610] },
-                    { id: "sm_ied_ln", name: "IED Liceo del Norte", zone: "Urbana", coords: [11.2428, -74.1982] },
-                    { id: "sm_ied_ct", name: "I.E.D. Camilo Torres", zone: "Urbana", coords: [11.1932, -74.2235] },
-                    { id: "sm_ied_lrm", name: "Institución Educativa Libardo Ramiro Muñoz", zone: "Urbana", coords: [11.2185, -74.2120] },
+                    { id: "sm_ied_mag", name: "I.E.D. Magdalena", zone: "Urbana", coords: [11.24195459455506, -74.1966160597475] },
+                    { id: "sm_ied_jmd", name: "IED Juan Miguel D'Osuna", zone: "Urbana", coords: [11.22569016697624, -74.17460354175658] },
+                    { id: "sm_ied_on", name: "IED Once de Noviembre", zone: "Urbana", coords: [11.221588946664031, -74.15606096498708] },
+                    { id: "sm_ied_jlg", name: "IED José Laborde Gnecco", zone: "Urbana", coords: [11.192958212809025, -74.22407123091298] },
+                    { id: "sm_ied_sb", name: "I.E.D. Simón Bolívar", zone: "Urbana", coords: [11.187663181892308, -74.21709583067158] },
+                    { id: "sm_ied_rdb", name: "IED Rodrigo de las Bastidas", zone: "Urbana", coords: [11.230679450961079, -74.17589079246063] },
+                    { id: "sm_ied_ti", name: "IED Técnico Industrial", zone: "Urbana", coords: [11.243397190062135, -74.20424532110744] },
+                    { id: "sm_ied_pc", name: "IED Pedagógico del Caribe", zone: "Urbana", coords: [11.200898358553742, -74.16440580361768] },
+                    { id: "sm_ied_nb", name: "IED Nicolás Buenaventura", zone: "Urbana", coords: [11.248885796397412, -74.17089768604747] },
+                    { id: "sm_ied_sr", name: "IED Simón Rodríguez", zone: "Urbana", coords: [11.228496434938736, -74.16743289042674] },
+                    { id: "sm_ied_ln", name: "IED Liceo del Norte", zone: "Urbana", coords: [11.249778703828827, -74.20185935847962] },
+                    { id: "sm_ied_ct", name: "I.E.D. Camilo Torres", zone: "Urbana", coords: [11.193302536512217, -74.21873509042702] },
+                    { id: "sm_ied_lrm", name: "Institución Educativa Libardo Ramiro Muñoz", zone: "Urbana", coords: null }, // No encontrada
+                    
                     // ZONA RURAL
-                    { id: "sm_ied_bon", name: "IED Bonda (Sede Inmaculada Concepción)", zone: "Rural", coords: [11.2405, -74.1065] },
-                    { id: "sm_ied_rev", name: "Institución Etnoeducativa Distrital Intercultural La Revuelta", zone: "Rural", coords: [11.2825, -73.9105] }
+                    { id: "sm_ied_bon", name: "IED Bonda (Sede 4 Inmaculada Concepción)", zone: "Rural", coords: [11.230894009886562, -74.13064140207788] },
+                    { id: "sm_ied_rev", name: "Institución Etnoeducativa Distrital Intercultural La Revuelta", zone: "Rural", coords: [11.278347292734285, -73.94121982546527] }
                 ]
             },
             {
                 id: "aracataca",
                 name: "Aracataca",
-                coords: [10.5928, -74.1892], // Centro de Aracataca
+                coords: [10.590840570268254, -74.18941644620368],
                 zoom: 14,
                 instituciones: [
-                    { id: "ara_ied_evt", name: "IED Elvia Vizcaíno de Todaro", zone: "Urbana", coords: [10.5928, -74.1892] }
+                    { id: "ara_ied_evt", name: "IED Elvia Vizcaíno de Todaro", zone: "Urbana", coords: [10.590840570268254, -74.18941644620368] }
                 ]
             }
         ];
@@ -298,8 +330,9 @@
 
             L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-            muniLayerGroup = L.layerGroup().addTo(map);
+            // Capa de instituciones en el fondo, municipios arriba
             instLayerGroup = L.layerGroup().addTo(map);
+            muniLayerGroup = L.layerGroup().addTo(map);
 
             map.on('zoomend', handleZoomEnd);
         }
@@ -308,19 +341,26 @@
             educacionData.forEach(muni => {
                 const totalInst = muni.instituciones.length;
 
-                // 1. Marcador Municipio (Burbuja Principal)
+                // 1. Marcador Municipio (Burbuja Principal) con Z-Index mayor
                 const muniIcon = L.divIcon({
                     className: '',
-                    html: `<div class="muni-bubble" id="muni-bubble-${muni.id}" style="width:48px; height:48px;">${totalInst}</div>`,
-                    iconSize: [48, 48],
-                    iconAnchor: [24, 24]
+                    html: `<div class="marker-wrapper"><div class="muni-bubble" id="muni-bubble-${muni.id}" style="width:52px; height:52px;">${totalInst}</div></div>`,
+                    iconSize: [52, 52],
+                    iconAnchor: [26, 26]
                 });
 
-                const muniMarker = L.marker(muni.coords, { icon: muniIcon });
+                const muniMarker = L.marker(muni.coords, { icon: muniIcon, zIndexOffset: 1000 });
                 muniMarker.bindTooltip(`<b>${muni.name}</b><br>${totalInst} Instituciones`, { direction: 'bottom', className: 'modern-tooltip' });
                 
                 muniMarker.on('click', () => {
-                    map.flyTo(muni.coords, muni.zoom);
+                    // Si tiene puntos válidos, encuadrar automáticamente todas sus instituciones
+                    const validCoords = muni.instituciones.filter(i => i.coords !== null).map(i => i.coords);
+                    if (validCoords.length > 0) {
+                        const bounds = L.latLngBounds(validCoords);
+                        map.flyToBounds(bounds, { padding: [60, 60], maxZoom: 14 });
+                    } else {
+                        map.flyTo(muni.coords, muni.zoom);
+                    }
                     openSidebar(muni.id);
                 });
 
@@ -328,17 +368,20 @@
 
                 // 2. Marcadores para Colegios Individuales
                 muni.instituciones.forEach((inst, index) => {
+                    if (!inst.coords) return; // Si no tiene coordenadas se omite del mapa
+
                     const instIcon = L.divIcon({
                         className: '',
-                        html: `<div class="inst-bubble inst-for-${muni.id}" id="inst-bubble-${inst.id}" style="width:24px; height:24px; --delay: ${index * 0.04}s">IE</div>`,
-                        iconSize: [24, 24],
-                        iconAnchor: [12, 12]
+                        html: `<div class="marker-wrapper"><div class="inst-bubble inst-for-${muni.id}" id="inst-bubble-${inst.id}" style="width:26px; height:26px; --delay: ${index * 0.03}s">IE</div></div>`,
+                        iconSize: [26, 26],
+                        iconAnchor: [13, 13]
                     });
 
-                    const instMarker = L.marker(inst.coords, { icon: instIcon });
+                    const instMarker = L.marker(inst.coords, { icon: instIcon, zIndexOffset: 10 });
                     instMarker.bindTooltip(inst.name, { direction: 'top', className: 'modern-tooltip' });
 
-                    instMarker.on('click', () => {
+                    instMarker.on('click', (e) => {
+                        L.DomEvent.stopPropagation(e); // Evita interferencias
                         openSidebar(muni.id, inst.id);
                     });
 
@@ -347,6 +390,7 @@
             });
         }
 
+        // Control estricto de visibilidad para prevenir clics indeseados
         function handleZoomEnd() {
             const currentZoom = map.getZoom();
             const muniBubbles = document.querySelectorAll('.muni-bubble');
@@ -391,11 +435,17 @@
                 const instsInZone = muniData.instituciones.filter(i => i.zone === zone);
                 instsInZone.forEach(inst => {
                     const li = document.createElement('li');
-                    li.className = `inst-item ${highlightInstId === inst.id ? 'highlight' : ''}`;
-                    li.id = `item-${inst.id}`;
-                    li.innerText = inst.name;
+                    const hasCoord = inst.coords !== null;
                     
-                    li.onclick = () => highlightMarker(inst);
+                    li.className = `inst-item ${highlightInstId === inst.id ? 'highlight' : ''} ${!hasCoord ? 'no-coord' : ''}`;
+                    li.id = `item-${inst.id}`;
+                    
+                    if (hasCoord) {
+                        li.innerText = inst.name;
+                        li.onclick = () => highlightMarker(inst);
+                    } else {
+                        li.innerHTML = `<span>${inst.name}</span><span class="tag-pending">Ubicación pendiente</span>`;
+                    }
                     
                     ul.appendChild(li);
                 });
@@ -423,10 +473,12 @@
         }
 
         function highlightMarker(inst) {
+            if (!inst.coords) return;
+
             document.querySelectorAll('.inst-item').forEach(el => el.classList.remove('highlight'));
             document.getElementById(`item-${inst.id}`)?.classList.add('highlight');
             
-            map.flyTo(inst.coords, 15);
+            map.flyTo(inst.coords, 16);
             
             const bubbleEl = document.getElementById(`inst-bubble-${inst.id}`);
             if (bubbleEl) {
